@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bid Bazaar - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            height: 40px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #4A4A4A;
+            font-weight: 500;
+        }
+        
+        /* Main content styles */
+        main {
+            display: flex;
+            flex: 1;
+        }
+        
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #6AA3B4 0%, #4A8899 100%);
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .promo-content {
+            position: relative;
+            z-index: 2;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .promo-content h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .promo-content h2 {
+            text-align: center;
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-showcase {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 70%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .logo-showcase img {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .right-panel {
+            width: 400px;
+            background-color: #0F1627;
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .login-form {
+            max-width: 350px;
+            margin: 0 auto;
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 4px;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .form-links {
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-links a {
+            color: #4195F7;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #4195F7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        
+        .register-link {
+            text-align: center;
+        }
+        
+        .register-link a {
+            color: #4195F7;
+            text-decoration: none;
+        }
+        
+        /* Footer styles */
+        footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer-logo {
+            height: 35px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .footer-links a {
+            text-decoration: none;
+            color: #4A4A4A;
+            font-size: 0.9rem;
+        }
+        
+        .copyright {
+            font-size: 0.9rem;
+            color: #4A4A4A;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="#"><img src="img\10_Tips_To_Create_A_Good_Wave_Logo_Design_1_1024x1024.webp" alt="Bid Bazaar" class="logo"></a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="#">Categories</a>
+            <a href="register.html">Register</a>
+            <a href="signin.html">Login</a>
+        </div>
+    </header>
+    
+    <main>
+        <div class="left-panel">
+            <div class="promo-content">
+                <h1>An Auction Platform for</h1>
+                <h2>Collectors</h2>
+                
+                <div class="logo-showcase">
+                    <img src="img\Microcosm_of_London_Plate_006_-_Auction_Room,_Christie's_(colour).webp" alt="Bid Bazaar Logo with Gavel">
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="login-form">
+                <h2>Login</h2>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" value="blockbusterandy">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" value="••••••••">
+                </div>
+                
+                <div class="form-links">
+                    <a href="#">Forgot Password?</a>
+                </div>
+                
+                <button class="login-btn" onclick="login()">Login</button>
+                
+                <div class="register-link">
+                    <a href="register.html">Register Here</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <a href="#"><img src="img\10_Tips_To_Create_A_Good_Wave_Logo_Design_1_1024x1024.webp" alt="Bid Bazaar" class="footer-logo"></a>
+        <div class="copyright">All Rights Reserved © bidbazaar.com</div>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Contact Us</a>
+        </div>
+    </footer>
+
+    <script>
+        function login() {
+            // Mock login logic
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Here you can add your actual login logic
+            if (username && password) {
+                alert(`Welcome back, ${username}!`);
+                // Redirect to home page
+                window.location.href = "http://127.0.0.1:5500/index.html";
+            } else {
+                alert("Please enter valid credentials.");
+            }
+        }
+    </script>
+</body>
+</html>
