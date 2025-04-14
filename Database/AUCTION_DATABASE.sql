@@ -5,7 +5,7 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS DB;
 USE DB;
 
--- Table: member (Must be created first since other tables reference it)
+-- Table: member
 CREATE TABLE member (
   member_ID INT(11) NOT NULL AUTO_INCREMENT,
   password VARCHAR(20) NOT NULL,
@@ -46,11 +46,10 @@ CREATE TABLE items (
   FOREIGN KEY (seller_ID) REFERENCES seller(member_ID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Table: bids
+-- Table: bids (Normalized: Removed seller_ID)
 CREATE TABLE bids (
   bid_ID INT(11) NOT NULL AUTO_INCREMENT,
   buyer_ID INT(11) NOT NULL,
-  seller_ID INT(11) NOT NULL,
   item_ID INT(11) NOT NULL,
   bidPlacedTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   bidStatus TINYINT(1) NOT NULL,
@@ -58,11 +57,10 @@ CREATE TABLE bids (
   bidIncrement DECIMAL(10, 2) NOT NULL,
   PRIMARY KEY (bid_ID),
   FOREIGN KEY (buyer_ID) REFERENCES member(member_ID) ON DELETE CASCADE,
-  FOREIGN KEY (seller_ID) REFERENCES seller(member_ID) ON DELETE CASCADE,
   FOREIGN KEY (item_ID) REFERENCES items(item_ID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Insert sample data into the tables
+-- Sample Data
 INSERT INTO member (member_ID, password, email, name, phoneNumber, homeAddress) VALUES
 (1, 'aaron_2025', 'aaron_2025@gmail.com', 'Aaron 2025', '4076147198', '100 Oak Ave, City, WA'),
 (2, 'shannon_2025', 'shannon_2025@yahoo.com', 'Shannon 2025', '9788685889', '200 Greystone Ave, CT'),
@@ -75,31 +73,26 @@ INSERT INTO member (member_ID, password, email, name, phoneNumber, homeAddress) 
 (9, 'user9_2025', 'user9@example.com', 'User Nine', '2345678901', '900 Example Ave, CA'),
 (10, 'user10_2025', 'user10@example.com', 'User Ten', '3456789012', '1000 Example Blvd, TX');
 
--- Insert administrators
-INSERT INTO administrator (member_ID) VALUES
-(1), (2), (3);
+INSERT INTO administrator (member_ID) VALUES (1), (2), (3);
 
--- Insert sellers
 INSERT INTO seller (member_ID, bankAccountNum, routingNum) VALUES
 (4, '12345678', '111111111'),
 (7, '23456789', '222222222'),
 (9, '34567890', '333333333'),
 (10, '45678901', '444444444');
 
--- Insert items
 INSERT INTO items (item_ID, seller_ID, startingBidPrice, description, startDate, endDate, category, itemTitle) VALUES
 (1, 4, 10.00, 'Limited Edition Art Print', '2025-02-05 14:45:00', '2025-02-20 14:45:00', 'Art', 'Art Print'),
 (2, 7, 500.00, 'Brand New Gaming Laptop', '2025-02-05 14:45:00', '2025-02-25 14:45:00', 'Electronics', 'Gaming Laptop'),
 (3, 9, 80.00, 'Professional Camera Lens', '2025-02-05 14:45:00', '2025-03-05 14:45:00', 'Photography', 'Camera Lens'),
 (4, 10, 5.00, 'Vintage Comic Book', '2025-02-05 14:45:00', '2025-03-10 14:45:00', 'Collectibles', 'Comic Book');
 
--- Insert bids
-INSERT INTO bids (buyer_ID, seller_ID, item_ID, bidPlacedTime, bidStatus, bidPrice, bidIncrement) VALUES
-(5, 4, 1, '2025-02-05 14:45:00', 1, 15.00, 1.00),
-(6, 7, 2, '2025-02-05 14:45:00', 0, 40.00, 5.00),
-(8, 10, 4, '2025-02-05 14:45:00', 1, 10.00, 1.00);
+INSERT INTO bids (buyer_ID, item_ID, bidPlacedTime, bidStatus, bidPrice, bidIncrement) VALUES
+(5, 1, '2025-02-05 14:45:00', 1, 15.00, 1.00),
+(6, 2, '2025-02-05 14:45:00', 0, 40.00, 5.00),
+(8, 4, '2025-02-05 14:45:00', 1, 10.00, 1.00);
 
--- Create a View for bid details
+-- View: bid_details (Adjusted for seller via join)
 CREATE VIEW bid_details AS
 SELECT 
     b.bid_ID, 
@@ -110,11 +103,11 @@ SELECT
     b.bidPlacedTime
 FROM bids b
 JOIN member m ON b.buyer_ID = m.member_ID
-JOIN seller s ON b.seller_ID = s.member_ID
-JOIN member sm ON s.member_ID = sm.member_ID
-JOIN items i ON b.item_ID = i.item_ID;
+JOIN items i ON b.item_ID = i.item_ID
+JOIN seller s ON i.seller_ID = s.member_ID
+JOIN member sm ON s.member_ID = sm.member_ID;
 
--- Trigger to remove expired bids
+-- Trigger: remove_expired_bids
 DELIMITER //
 CREATE TRIGGER remove_expired_bids
 BEFORE UPDATE ON items
@@ -126,7 +119,28 @@ BEGIN
 END//
 DELIMITER ;
 
--- Cursor to process all bids for item with ID = 1
+-- View: bid_summary
+CREATE VIEW bid_summary AS
+SELECT 
+    b.item_ID,
+    i.itemTitle, 
+    sm.name AS seller_name, 
+    COUNT(b.bid_ID) AS total_bids, 
+    MAX(b.bidPrice) AS highest_bid, 
+    MIN(b.bidPrice) AS lowest_bid,
+    AVG(b.bidPrice) AS avg_bid_price,
+    CASE 
+        WHEN i.endDate < NOW() THEN 'Closed'
+        ELSE 'Active'
+    END AS auction_status
+FROM bids b
+JOIN member m ON b.buyer_ID = m.member_ID
+JOIN items i ON b.item_ID = i.item_ID
+JOIN seller s ON i.seller_ID = s.member_ID
+JOIN member sm ON s.member_ID = sm.member_ID
+GROUP BY b.item_ID, i.itemTitle, sm.name, i.endDate;
+
+-- Procedure: process_bids (for item_ID = 1)
 DELIMITER //
 CREATE PROCEDURE process_bids()
 BEGIN
@@ -143,10 +157,60 @@ BEGIN
         IF done THEN
             LEAVE read_loop;
         END IF;
-        -- Process the bid (e.g., determine if it's the highest bid)
-        -- For now, we'll just display the bid ID and price:
         SELECT v_bid_ID, v_bidPrice;
     END LOOP;
     CLOSE cur;
+END//
+DELIMITER ;
+
+-- Procedure: find_highest_bids
+DROP PROCEDURE IF EXISTS find_highest_bids;
+
+DELIMITER //
+CREATE PROCEDURE find_highest_bids()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE current_item_id INT;
+    DECLARE current_item_title VARCHAR(30);
+    DECLARE highest_bid DECIMAL(10, 2);
+    DECLARE highest_bidder VARCHAR(30);
+    
+    DECLARE item_cursor CURSOR FOR 
+        SELECT DISTINCT i.item_ID, i.itemTitle
+        FROM items i
+        JOIN bids b ON i.item_ID = b.item_ID
+        ORDER BY i.item_ID;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    
+    CREATE TEMPORARY TABLE IF NOT EXISTS highest_item_bids (
+        item_id INT,
+        item_title VARCHAR(30),
+        highest_bid DECIMAL(10, 2),
+        bidder_name VARCHAR(30)
+    );
+    
+    OPEN item_cursor;
+    item_loop: LOOP
+        FETCH item_cursor INTO current_item_id, current_item_title;
+        IF done THEN
+            LEAVE item_loop;
+        END IF;
+        
+        SELECT b.bidPrice, m.name
+        INTO highest_bid, highest_bidder
+        FROM bids b
+        JOIN member m ON b.buyer_ID = m.member_ID
+        WHERE b.item_ID = current_item_id
+        ORDER BY b.bidPrice DESC
+        LIMIT 1;
+        
+        INSERT INTO highest_item_bids
+        VALUES (current_item_id, current_item_title, highest_bid, highest_bidder);
+    END LOOP;
+    
+    CLOSE item_cursor;
+    SELECT * FROM highest_item_bids;
+    DROP TEMPORARY TABLE IF EXISTS highest_item_bids;
 END//
 DELIMITER ;
